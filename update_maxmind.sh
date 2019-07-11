@@ -16,7 +16,7 @@ downloaddb() {
     current_db=$1
 
     # Syslog that we start working on the current db
-    logger -t user.info -s "Start working on: ${current_db}"
+    logger -t user.info -s "${SCRIPTNAME}: Start working on: ${current_db}"
 
     # Create DOWNLOADDIR if not present
     if [ ! -d ${DOWNLOADDIR} ]; then
@@ -48,7 +48,15 @@ downloaddb() {
 
     # Copy file into place if different from already current file
     MMDB_FILENAME=$( basename ${MMDB_FILEPATH} )
-    CALC_OLD_DB_MD5=$( md5sum ${GEOIP_DIR}/${MMDB_FILENAME} | awk '{print $1}' )
+
+    # Calculate checksum for current "installed" DB file if it exists
+    if [ -f ${GEOIP_DIR}/${MMDB_FILENAME} ]; then
+        CALC_OLD_DB_MD5=$( md5sum ${GEOIP_DIR}/${MMDB_FILENAME} | awk '{print $1}' )
+    else
+        CALC_OLD_DB_MD5='nosuchfile'
+    fi
+
+    # Copy file into place if different from already current file
     if [ x"${CALC_OLD_DB_MD5}" != x"${DB_MD5}" ]; then
         cp ${MMDB_FILEPATH} ${GEOIP_DIR}/
     fi
@@ -57,7 +65,7 @@ downloaddb() {
     rm -rf ${DOWNLOADDIR}/*
 
     # Syslog that we finished working on the current db
-    logger -t user.info -s "Finished working on: ${current_db}"
+    logger -t user.info -s "${SCRIPTNAME}: Finished working on: ${current_db}"
 }
 
 ccdb() {
