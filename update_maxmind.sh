@@ -15,6 +15,10 @@ GEOIP_DIR='/usr/share/GeoIP'
 downloaddb() {
     current_db=$1
 
+    # Syslog that we start working on the current db
+    logger -t user.info -s "Start working on: ${current_db}"
+
+    # Create DOWNLOADDIR if not present
     if [ ! -d ${DOWNLOADDIR} ]; then
         mkdir ${DOWNLOADDIR}
     fi
@@ -51,6 +55,9 @@ downloaddb() {
 
     # Cleanup DOWNLOADDIR
     rm -rf ${DOWNLOADDIR}/*
+
+    # Syslog that we finished working on the current db
+    logger -t user.info -s "Finished working on: ${current_db}"
 }
 
 ccdb() {
