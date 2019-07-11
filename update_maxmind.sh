@@ -41,10 +41,13 @@ downloaddb() {
 
     # Get full path to mmdb file
     MMDB_FILEPATH=$( find ${DOWNLOADDIR}/ -type f -name *.mmdb -print )
-    echo ${MMDB_FILEPATH}
 
-    # Copy file into place
-    cp ${MMDB_FILEPATH} ${GEOIP_DIR}
+    # Copy file into place if different from already current file
+    MMDB_FILENAME=$( basename ${MMDB_FILEPATH} )
+    CALC_OLD_DB_MD5=$( md5sum ${GEOIP_DIR}/${MMDB_FILENAME} | awk '{print $1}' )
+    if [ x"${CALC_OLD_DB_MD5}" != x"${DB_MD5}" ]; then
+        cp ${MMDB_FILEPATH} ${GEOIP_DIR}/
+    fi
 
     # Cleanup DOWNLOADDIR
     rm -rf ${DOWNLOADDIR}/*
