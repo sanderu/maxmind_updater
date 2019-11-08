@@ -3,25 +3,39 @@
 SCRIPTNAME=$0
 ARGUMENT=$1
 
+# GeoIP URL + filenames
 BASE_URL='https://geolite.maxmind.com/download/geoip/database'
 DB_CITY='GeoLite2-City.tar.gz'
 DB_COUNTRY='GeoLite2-Country.tar.gz'
 DB_ASN='GeoLite2-ASN.tar.gz'
 
+# Directories:
 DOWNLOADDIR='/tmp/maxmind'
 GEOIP_DIR='/usr/share/GeoIP'
 
+sanity_checks() {
+    # Are we root?
+    if [ ${UID} -ne 0 ]; then
+        logger -t user.info -s "${SCRIPTNAME}: you need to be root for this to run."
+    fi
+
+    # Create DOWNLOADDIR if not present
+    if [ ! -d ${DOWNLOADDIR} ]; then
+        mkdir ${DOWNLOADDIR}
+    fi
+
+    # Create GEOIP_DIR if not present
+    if [ ! -d ${GEOIP_DIR} ]; then
+        mkdir ${GEOIP_DIR}
+    fi
+
+}
 
 downloaddb() {
     current_db=$1
 
     # Syslog that we start working on the current db
     logger -t user.info -s "${SCRIPTNAME}: Start working on: ${current_db}"
-
-    # Create DOWNLOADDIR if not present
-    if [ ! -d ${DOWNLOADDIR} ]; then
-        mkdir ${DOWNLOADDIR}
-    fi
 
     # Getting the DB + checksum file
     echo "DB: ${current_db}"
@@ -85,6 +99,11 @@ usage() {
     echo "   cc  - City/Country DB update"
     echo "   asn - ASN DB update"
 }
+
+################
+# MAIN PROGRAM #
+################
+sanity_checks
 
 case "${ARGUMENT}" in
     cc)
