@@ -1,23 +1,38 @@
 # maxmind_updater
 Keep local maxmind database up to date
 
-Maxmind GeoLite2 database files gets updated continously.
-City/Country every first Tuesday of the month.
-ASN every Tuesday.
+Maxmind GeoLite2 database files gets updated continously (every Tuesday).
+
 
 Scripts takes one argument (pretty selfexplanatory):
+
 cc = City/Country
+
 asn = ASN
 
-
-Crontab entry:
-
-Update City/Country DB every first Tuesday of the month (i.e. day 1-7 and Tuesday):
-
-0  8   1-7 *   2   /bin/bash /path/to/update_maxmind.sh cc
+all = ASN/City/Country
 
 
-Update ASN DB every Tuesday:
+Crontab entry (examples):
 
-0  8   *   *   2   /bin/bash /path/to/update_maxmind.sh asn
+If you only want to update City/Country DB every Tuesday of the month:
+
+0  15   *   *   2   /bin/bash /path/to/update_maxmind.sh cc
+
+
+Update all DBs every Tuesday:
+
+30  15  *   *   2   /bin/bash /path/to/update_maxmind.sh all
+
+
+## REGISTRATION NEEDED!
+Due to GDPR/CCPA MaxMind changed their EULA as per December 30th 2019 requiring
+
+you to register at their website to be able to download the databases.
+
+Registration is free.
+
+You will have to generate a license key to use within the script:
+
+Account -> Services -> My License Key -> Generate Key
 

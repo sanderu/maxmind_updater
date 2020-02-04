@@ -95,10 +95,17 @@ asndb() {
     done
 }
 
+update_dbs() {
+    for DB in ${DB_ASN} ${DB_CITY} ${DB_COUNTRY}; do
+        downloaddb ${DB}
+    done
+}
+
 usage() {
-    echo "Usage: ${SCRIPTNAME} <cc|asn>"
+    echo "Usage: ${SCRIPTNAME} <cc|asn|all>"
     echo "   cc  - City/Country DB update"
     echo "   asn - ASN DB update"
+    echo "   all - ASN/City/Country DB update"
 }
 
 ################
@@ -112,6 +119,9 @@ case "${ARGUMENT}" in
         ;;
     asn)
         asndb
+        ;;
+    all)
+        update_dbs
         ;;
     *)
         usage
