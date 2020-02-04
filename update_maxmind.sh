@@ -4,10 +4,11 @@ SCRIPTNAME=$0
 ARGUMENT=$1
 
 # GeoIP URL + filenames
-BASE_URL='https://geolite.maxmind.com/download/geoip/database'
-DB_CITY='GeoLite2-City.tar.gz'
-DB_COUNTRY='GeoLite2-Country.tar.gz'
-DB_ASN='GeoLite2-ASN.tar.gz'
+BASE_URL='https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2'
+DB_CITY='City'
+DB_COUNTRY='Country'
+DB_ASN='ASN'
+LICENSE_KEY='<YOUR-LICENSE-KEY>'
 
 # Directories:
 DOWNLOADDIR='/tmp/maxmind'
@@ -35,11 +36,11 @@ downloaddb() {
     current_db=$1
 
     # Syslog that we start working on the current db
-    logger -t user.info -s "${SCRIPTNAME}: Start working on: ${current_db}"
+    logger -t user.info -s "${SCRIPTNAME}: Start working on: GeoLite2-${current_db}"
 
     # Getting the DB + checksum file
     echo "DB: ${current_db}"
-    WGET_URL="${BASE_URL}/${current_db}"
+    WGET_URL="${BASE_URL}-${current_db}"'&license_key='"${LICENSE_KEY}"'&suffix=tar.gz'
     TARGET_FILE="${DOWNLOADDIR}/${current_db}"
     wget ${WGET_URL} -O ${TARGET_FILE}
     wget ${WGET_URL}.md5 -O ${TARGET_FILE}.md5
@@ -79,7 +80,7 @@ downloaddb() {
     rm -rf ${DOWNLOADDIR}/*
 
     # Syslog that we finished working on the current db
-    logger -t user.info -s "${SCRIPTNAME}: Finished working on: ${current_db}"
+    logger -t user.info -s "${SCRIPTNAME}: Finished working on: GeoLite2-${current_db}"
 }
 
 ccdb() {
