@@ -53,7 +53,7 @@ downloaddb() {
     # Compare calculated checksum to checksum file. If no match, syslog error msg and exit
     if [ x"${CALC_DB_MD5}" != x"${DB_MD5}" ]; then
         logger -t user.error -s "${SCRIPTNAME}: ${current_db} checksum does not match provided checksum."
-        exit 0
+        exit 1
     fi
 
     # Unpack mmdb file from DB file
@@ -130,3 +130,4 @@ case "${ARGUMENT}" in
         ;;
 esac
 
+exit 0
