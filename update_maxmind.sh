@@ -43,8 +43,8 @@ downloaddb() {
     echo "DB: ${current_db}"
     WGET_URL="${BASE_URL}-${current_db}"'&license_key='"${LICENSE_KEY}"'&suffix=tar.gz'
     TARGET_FILE="${DOWNLOADDIR}/${current_db}"
-    wget ${WGET_URL} -O ${TARGET_FILE}
-    wget ${WGET_URL}.md5 -O ${TARGET_FILE}.md5
+    wget -q ${WGET_URL} -O ${TARGET_FILE}
+    wget -q ${WGET_URL}.md5 -O ${TARGET_FILE}.md5
 
     # Calculate DB checksum and compare to checksum file
     CALC_DB_MD5=$( md5sum ${DOWNLOADDIR}/${current_db} | awk '{print $1}' )
