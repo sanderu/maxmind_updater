@@ -17,7 +17,8 @@ GEOIP_DIR='/usr/share/GeoIP'
 sanity_checks() {
     # Are we root?
     if [ ${UID} -ne 0 ]; then
-        logger -t user.info -s "${SCRIPTNAME}: you need to be root for this to run."
+        logger -t user.info -s "${SCRIPTNAME}: you need to run this script as root or using sudo."
+        exit 1
     fi
 
     # Create DOWNLOADDIR if not present
