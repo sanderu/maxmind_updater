@@ -75,6 +75,7 @@ downloaddb() {
     # Copy file into place if different from already current file
     if [ x"${CALC_OLD_DB_MD5}" != x"${DB_MD5}" ]; then
         cp ${MMDB_FILEPATH} ${GEOIP_DIR}/
+        logger -t user.info -s "${SCRIPTNAME}: Updated local file using: GeoLite2-${current_db}"
     fi
 
     # Cleanup DOWNLOADDIR
