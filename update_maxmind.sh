@@ -18,6 +18,7 @@ LICENSE_KEY='<YOUR-LICENSE-KEY>'
 # Directories:
 DOWNLOADDIR='/tmp/maxmind'
 GEOIP_DIR='/usr/share/GeoIP'
+BACKUP_DIR="/opt/maxmind_backup"
 
 sanity_checks() {
     # Are we root?
@@ -36,10 +37,15 @@ sanity_checks() {
         mkdir ${GEOIP_DIR}
     fi
 
+    # Create BACKUP_DIR if not present
+    if [ ! -d ${BACKUP_DIR} ]; then
+        mkdir ${BACKUP_DIR}
+    fi
 }
 
 downloaddb() {
     current_db=$1
+    cd /tmp
 
     # Syslog that we start working on the current db
     logger -t user.info -s "${SCRIPTNAME}: Start working on: GeoLite2-${current_db}"
@@ -55,14 +61,17 @@ downloaddb() {
     CALC_DB_MD5=$( md5sum ${DOWNLOADDIR}/${current_db} | awk '{print $1}' )
     DB_MD5=$( cat ${TARGET_FILE}.md5 )
 
-    # Compare calculated checksum to checksum file. If no match, syslog error msg and exit
+    # Compare calculated checksum of unpacked dir to checksum file. If no match, syslog error msg and exit
     if [ x"${CALC_DB_MD5}" != x"${DB_MD5}" ]; then
-        logger -t user.error -s "${SCRIPTNAME}: ${current_db} checksum does not match provided checksum."
+        logger -t user.error -s "${SCRIPTNAME}: ${current_db} tarball checksum does not match provided checksum."
         exit 1
     fi
 
     # Unpack mmdb file from DB file
     tar -xzf ${TARGET_FILE} -C ${DOWNLOADDIR} --wildcards *.mmdb
+
+    # Get datestamp of DB file
+    FILEDATE=$( tar -tzvf ${TARGET_FILE} | grep ^d | awk -F "GeoLite2-${current_db}_" '{print $2}' | cut -f 1 -d '/' )
 
     # Get full path to mmdb file
     MMDB_FILEPATH=$( find ${DOWNLOADDIR}/ -type f -name *.mmdb -print )
@@ -72,18 +81,23 @@ downloaddb() {
 
     # Calculate checksum for current "installed" DB file if it exists
     if [ -f ${GEOIP_DIR}/${MMDB_FILENAME} ]; then
+        CALC_NEW_DB_MD5=$( md5sum ${MMDB_FILEPATH} | awk '{print $1}' )
         CALC_OLD_DB_MD5=$( md5sum ${GEOIP_DIR}/${MMDB_FILENAME} | awk '{print $1}' )
     else
         CALC_OLD_DB_MD5='nosuchfile'
     fi
 
     # Copy file into place if different from already current file
-    if [ x"${CALC_OLD_DB_MD5}" != x"${DB_MD5}" ]; then
+    if [ x"${CALC_NEW_DB_MD5}" != x"${CALC_OLD_DB_MD5}" ]; then
         cp ${MMDB_FILEPATH} ${GEOIP_DIR}/
+        cp ${MMDB_FILEPATH} ${BACKUP_DIR}/${FILEDATE}_${MMDB_FILENAME}
+        cd ${BACKUP_DIR}
+        tar -czf ${FILEDATE}_${MMDB_FILENAME}.tar.gz ${FILEDATE}_${MMDB_FILENAME}
         logger -t user.info -s "${SCRIPTNAME}: Updated local file using: GeoLite2-${current_db}"
     fi
 
-    # Cleanup DOWNLOADDIR
+    # Cleanup
+    rm ${BACKUP_DIR}/${FILEDATE}_${MMDB_FILENAME}
     rm -rf ${DOWNLOADDIR}/*
 
     # Syslog that we finished working on the current db
